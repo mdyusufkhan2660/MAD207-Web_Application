@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Class 1</title>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td><label for="fname">First Name: </label></td>
+                <td><input type="text" id="fname" name="fname"></td>
+            </tr>
+            <tr>
+                <td><label for="lname">Last Name: </label></td>
+                <td><input type="text" id="lname" name="lname"></td>
+            </tr>
+            <tr>
+                <td><label for="address">Address: </label></td>
+                <td><input type="text" id="address" name="address"></td>
+            </tr>
+            <tr>
+                <td><label for="city">City: </label></td>
+                <td><input type="text" id="city" name="city"></td>
+            </tr>
+            <tr>
+                <td><label for="province">Province: </label></td>
+                <td><input type="text" id="province" name="province"></td>
+            </tr>
+            <tr>
+                <td><label for="postalcode">Postal Code: </label></td>
+                <td><input type="text" id="postalcode" name="postalcode"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button onclick="myTable()">Submit</button></td>
+            </tr>
+        </table>
+        <h5 id="fullName"></h5>
+    </body>
+    <script>
+        function myTable(){
+            let first_name = document.getElementById("fname").value
+            let last_name = document.getElementById("lname").value
+            document.getElementById("fullName").innerHTML = "Full Name: " + first_name + " " + last_name
+        }
+    </script>
+</html>
