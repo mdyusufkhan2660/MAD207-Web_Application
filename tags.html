@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Class 1</title>
+        <title>MAD207 Web Application</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <table>
@@ -14,7 +15,7 @@
                 <td><input type="text" id="lname" name="lname"></td>
             </tr>
             <tr>
-                <td><label for="address">Address: </label></td>
+                <td id="add"><label for="address">Address: </label></td>
                 <td><input type="text" id="address" name="address"></td>
             </tr>
             <tr>
@@ -30,10 +31,11 @@
                 <td><input type="text" id="postalcode" name="postalcode"></td>
             </tr>
             <tr>
-                <td colspan="2"><button onclick="myTable()">Submit</button></td>
+                <td colspan="2" class="myClass"><button onclick="myTable()">Submit</button></td>
             </tr>
         </table>
-        <h5 id="fullName"></h5>
+        <p id="fullName"></p>
+        
     </body>
     <script>
         function myTable(){
