@@ -24,4 +24,5 @@ else{
     $uploadStatus = "Please select a file";
 }
 echo "<br>".$uploadStatus;
+header('location:users.php');
 ?>
