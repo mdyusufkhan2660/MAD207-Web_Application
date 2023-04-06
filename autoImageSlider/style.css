@@ -1,0 +1,8 @@
+.mySlides{
+  display: none;
+}
+.slideshow-container{
+  width: 500px;
+  height: 500px;
+  margin: auto;
+}
