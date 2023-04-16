@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            MAD207 Assignment 3
+        </title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>
+                    <table class="list" id="userList">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                                <th>DoB</th>
+                                <th>Gender</th>
+                                <th>Commands</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </td>
+                <td>
+                    <form onsubmit="event.preventDefault(); onFormSubmit();" autocomplete="off">
+                        <div>
+                            <label>ID</label><label class="validation-error hide" id="idValidationError">This field is required.</label>
+                            <input type="number" name="studentId" id="studentId">
+                        </div>
+                        <div>
+                            <label>First Name</label>
+                            <input type="text" name="firstName" id="firstName">
+                        </div>
+                        <div>
+                            <label>Last Name</label>
+                            <input type="text" name="lastName" id="lastName">
+                        </div>
+                        <div>
+                            <label>Email</label>
+                            <input type="email" name="email" id="email">
+                        </div>
+                        <div>
+                            <label>Date of Birth</label>
+                            <input type="date" name="studentDoB" id="studentDoB">
+                        </div>
+                        <div>
+                            <label>Gender</label>
+                            <select name="studentGender" id="studentGender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Picture</label>
+                            <input type="file" name="studentPicture" id="studentPicture">
+                        </div>
+                        <div  class="form-action-buttons">
+                            <input type="submit" value="Submit" name="btnSubmit">
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        <script type="module" src="database.js"></script>
+        <script type="module" src="script.js"></script>
+    </body>
+</html>
