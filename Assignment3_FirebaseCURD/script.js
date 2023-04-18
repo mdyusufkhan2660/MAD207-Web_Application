@@ -1,6 +1,7 @@
-import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
-// Your web app's Firebase configuration
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js";
+import { getDatabase, ref, set, get, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js";
+import { getStorage, uploadBytes, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.19.1/firebase-storage.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyBYIzN5GByTNyoMJgAUkNyEpG9fCygK5SE",
     authDomain: "fir-webappdemo-fff74.firebaseapp.com",
@@ -9,11 +10,8 @@ const firebaseConfig = {
     messagingSenderId: "306967142643",
     appId: "1:306967142643:web:00fc8f0e749fb5303b9786"
 };
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-import{getDatabase, ref, set, get, child, update, remove, onValue} 
-from "https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js";
-
+const storage = getStorage(app);
 const db = getDatabase();
 const table = document.getElementById("userList").getElementsByTagName("tbody")[0];
 var selectedRow = null;
@@ -28,6 +26,7 @@ window.onFormSubmit = function() {
         resetForm();
     }
 }
+
 window.readFormData = function() {
     var formData = {};
     formData["studentId"] = document.getElementById("studentId").value;
@@ -36,30 +35,47 @@ window.readFormData = function() {
     formData["email"] = document.getElementById("email").value;
     formData["studentDoB"] = document.getElementById("studentDoB").value;
     formData["studentGender"] = document.getElementById("studentGender").value;
+    formData["studentPicture"] = document.getElementById("studentPicture").files[0];
     return formData;
 }
 
-window.insertNewRecord = function(data) {
+window.insertNewRecord = async function(data) {
     var table = document.getElementById("userList").getElementsByTagName('tbody')[0];
     var newRow = table.insertRow(table.length);
-    var cell1 = newRow.insertCell(0);
-    cell1.innerHTML = data.studentId;
-    var cell2 = newRow.insertCell(1);
-    cell2.innerHTML = data.firstName;
-    var cell3 = newRow.insertCell(2);
-    cell3.innerHTML = data.lastName;
-    var cell4 = newRow.insertCell(3);
-    cell4.innerHTML = data.email;
-    var cell5 = newRow.insertCell(4);
-    cell5.innerHTML = data.studentDoB;
-    var cell6 = newRow.insertCell(5);
-    cell6.innerHTML = data.studentGender;
-    var cell7 = newRow.insertCell(6);
-    cell7.innerHTML = `<a onClick="onEdit(this)">Edit</a>
-                       <a onClick="onDelete(this)">Delete</a>`;
 
+    const url = await uploadPicturegetURL(data.studentPicture);
+    data.studentPicture = url;
+
+    newRow.insertCell(0).innerHTML = data.studentId;
+    newRow.insertCell(1).innerHTML = `<img id="picture${data.studentId}" src="${data.studentPicture}" width="50" height="50"></img>`;
+    newRow.insertCell(2).innerHTML = data.firstName;
+    newRow.insertCell(3).innerHTML = data.lastName;
+    newRow.insertCell(4).innerHTML = data.email;
+    newRow.insertCell(5).innerHTML = data.studentDoB;
+    newRow.insertCell(6).innerHTML = data.studentGender;
+    newRow.insertCell(7).innerHTML = `<a onClick="onEdit(this)">Edit</a>
+                                      <a onClick="onDelete(this)">Delete</a>`;
+    
+    insertData(data);
 }
 
+function insertData(data){
+    set(ref(db, "students/" + data.studentId),{
+        studentId: data.studentId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        studentDoB: data.studentDoB,
+        studentGender: data.studentGender,
+        studentPicture: data.studentPicture
+
+    }).then(()=>{
+        alert("Data inserted successfully");
+    }).catch((error)=>{
+        alert("Unsuccessful, error: " + error);
+    });
+}
+  
 window.resetForm = function() {
     document.getElementById("studentId").value = "";
     document.getElementById("firstName").value = "";
@@ -67,31 +83,65 @@ window.resetForm = function() {
     document.getElementById("email").value = "";
     document.getElementById("studentDoB").value = "";
     document.getElementById("studentGender").value = "Male";
+    document.getElementById("studentPicture").value = "";
     selectedRow = null;
 }
 
 window.onEdit = function(td) {
     selectedRow = td.parentElement.parentElement;
     document.getElementById("studentId").value = selectedRow.cells[0].innerHTML;
-    document.getElementById("firstName").value = selectedRow.cells[1].innerHTML;
-    document.getElementById("lastName").value = selectedRow.cells[2].innerHTML;
-    document.getElementById("email").value = selectedRow.cells[3].innerHTML;
-    document.getElementById("studentDoB").value = selectedRow.cells[4].innerHTML;
-    document.getElementById("studentGender").value = selectedRow.cells[5].innerHTML;
+    document.getElementById("firstName").value = selectedRow.cells[2].innerHTML;
+    document.getElementById("lastName").value = selectedRow.cells[3].innerHTML;
+    document.getElementById("email").value = selectedRow.cells[4].innerHTML;
+    document.getElementById("studentDoB").value = selectedRow.cells[5].innerHTML;
+    document.getElementById("studentGender").value = selectedRow.cells[6].innerHTML;
 }
 window.updateRecord = function(formData) {
-    selectedRow.cells[1].innerHTML = formData.firstName;
-    selectedRow.cells[2].innerHTML = formData.lastName;
-    selectedRow.cells[3].innerHTML = formData.email;
-    selectedRow.cells[4].innerHTML = formData.studentDoB;
-    selectedRow.cells[5].innerHTML = formData.studentGender;
+    selectedRow.cells[2].innerHTML = formData.firstName;
+    selectedRow.cells[3].innerHTML = formData.lastName;
+    selectedRow.cells[4].innerHTML = formData.email;
+    selectedRow.cells[5].innerHTML = formData.studentDoB;
+    selectedRow.cells[6].innerHTML = formData.studentGender;
+    updateData(formData);
+}
+async function updateData(data){
+    var file = document.getElementById("studentPicture").files[0];
+    var url = "";
+    if(file){
+        url = await uploadPicturegetURL(file);
+    }
+    else{
+        url = document.getElementById("picture"+data.studentId).src;
+    }
+    update(ref(db, "students/" + data.studentId),{
+        studentId: data.studentId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        studentDoB: data.studentDoB,
+        studentGender: data.studentGender,
+        studentPicture: url
+    }).then(()=>{
+        alert("Data updated successfully");
+    }).catch((error)=>{
+        alert("Unsuccessful, error: " + error);
+    });
 }
 window.onDelete = function(td) {
     if (confirm('Are you sure to delete this record ?')) {
-        row = td.parentElement.parentElement;
+        var row = td.parentElement.parentElement;
+        deleteData(row.cells[0].innerHTML);
         document.getElementById("userList").deleteRow(row.rowIndex);
         resetForm();
+        location.reload();
     }
+}
+function deleteData(id){
+    remove(ref(db, "students/" + id)).then(()=>{
+        alert("Data deleted successfully");
+    }).catch((error)=>{
+        alert("Unsuccessful, error: " + error);
+    });
 }
 window.validate = function() {
     var isValid = true;
@@ -107,38 +157,46 @@ window.validate = function() {
 }
 
 function renderData(data) {
-    table.innerHTML = ""; // Clear the table before rendering data
+    table.innerHTML = "";
     Object.keys(data).forEach((key) => {
       const student = data[key];
       const newRow = table.insertRow(table.length);
-      const cell1 = newRow.insertCell(0);
-      cell1.innerHTML = key;
-      const cell2 = newRow.insertCell(1);
-      cell2.innerHTML = student.firstName;
-      const cell3 = newRow.insertCell(2);
-      cell3.innerHTML = student.lastName;
-      const cell4 = newRow.insertCell(3);
-      cell4.innerHTML = student.email;
-      const cell5 = newRow.insertCell(4);
-      cell5.innerHTML = student.studentDoB;
-      const cell6 = newRow.insertCell(5);
-      cell6.innerHTML = student.studentGender;
-      const cell7 = newRow.insertCell(6);
-      cell7.innerHTML = `<a onClick="onEdit(this)">Edit</a>
-                         <a onClick="onDelete(this)">Delete</a>`;
+
+      newRow.insertCell(0).innerHTML = key;
+      newRow.insertCell(1).innerHTML = `<img id="picture${student.studentId}" src="${student.studentPicture}" width="50" height="50"></img>`;
+      newRow.insertCell(2).innerHTML = student.firstName;
+      newRow.insertCell(3).innerHTML = student.lastName;
+      newRow.insertCell(4).innerHTML = student.email;
+      newRow.insertCell(5).innerHTML = student.studentDoB;
+      newRow.insertCell(6).innerHTML = student.studentGender;
+      newRow.insertCell(7).innerHTML = `<a onClick="onEdit(this)">Edit</a>
+                                        <a onClick="onDelete(this)">Delete</a>`;
     });
   }
-  
-  // Function to handle realtime updates
-  function handleRealtimeUpdates() {
+  function showDataTable() {
     onValue(ref(db, "students"), (snapshot) => {
       const data = snapshot.val();
       renderData(data);
     });
   }
-  
-  // Call handleRealtimeUpdates to start listening to changes
-  handleRealtimeUpdates();
+  showDataTable();
+
+  function uploadPicturegetURL(file) {
+    const storageReference = storageRef(storage, "mad207-assignment3/"+file.name);
+    return new Promise((resolve, reject) => {
+        const task = uploadBytes(storageReference, file);
+        task.then(() => {
+            getDownloadURL(storageReference).then((url) => {
+                resolve(url);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+}
 
 
 
